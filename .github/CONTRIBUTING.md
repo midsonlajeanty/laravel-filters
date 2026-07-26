@@ -12,11 +12,11 @@ For security vulnerabilities, see [SECURITY.md](.github/SECURITY.md); **never** 
 
 ## Development Setup
 
-Requires PHP 8.2+ and Composer 2.
+Requires PHP 8.3+ and Composer 2.
 
 ```bash
-git clone https://github.com/midsonlajeanty/php-moncash-sdk.git
-cd php-moncash-sdk
+git clone https://github.com/midsonlajeanty/laravel-filters.git
+cd laravel-filters
 composer install
 ```
 
@@ -46,7 +46,7 @@ composer lint            # apply code style fixes
 composer refactor        # apply Rector refactorings
 ```
 
-> **Note:** the library targets **PHP 8.2 – 8.5** at runtime. CI runs the full suite (`composer test`) across a Laravel matrix (PHP **8.2 – 8.4** × Laravel **12/13**) and a runtime-compatibility job (`--no-dev` install + lint + smoke-load) on PHP **8.2 – 8.5**. Projects on PHP < 8.2 should use the `1.x` line.
+> **Note:** the library targets **PHP 8.3 – 8.5** at runtime. CI runs the full suite (`composer test`) across a Laravel matrix (PHP **8.3 – 8.5** × Laravel **11-13**) and a runtime-compatibility job (`--no-dev` install + lint + smoke-load) on PHP **8.3 – 8.5**. Projects on PHP < 8.3 should use the `1.x` line.
 
 ## Coding Standards
 
