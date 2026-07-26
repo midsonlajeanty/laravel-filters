@@ -285,6 +285,19 @@ final class DummyValueObjectTryFrom
         return new self($value);
     }
 }
+final class DummyValueObjectTryFromNull
+{
+    public function __construct(public string $value) {}
+
+    public static function tryFrom(string $value): ?self
+    {
+        if ($value === 'error') {
+            return null;
+        }
+
+        return new self($value);
+    }
+}
 
 it('casts value object', function (): void {
     $caster = new ValueObjectCaster;
@@ -298,6 +311,8 @@ it('casts value object', function (): void {
         public DummyValueObjectParse $voParse;
 
         public DummyValueObjectTryFrom $voTryFrom;
+
+        public DummyValueObjectTryFromNull $voTryFromNull;
 
         public int $builtin;
 
@@ -324,6 +339,11 @@ it('casts value object', function (): void {
     // Exception on tryFrom error
     expect(function () use ($caster, $type, $request): void {
         $caster->cast($type->getProperty('voTryFrom'), $type->getProperty('voTryFrom')->getType(), 'error', $request);
+    })->toThrow(CastException::class);
+
+    // Exception on tryFrom returning null
+    expect(function () use ($caster, $type, $request): void {
+        $caster->cast($type->getProperty('voTryFromNull'), $type->getProperty('voTryFromNull')->getType(), 'error', $request);
     })->toThrow(CastException::class);
 
     // Exception on parse with empty string (falls through)

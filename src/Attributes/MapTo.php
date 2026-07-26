@@ -9,5 +9,8 @@ use Attribute;
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_PARAMETER)]
 final readonly class MapTo
 {
-    public function __construct(public string $column) {}
+    public function __construct(
+        public string $column,
+        public ?string $operator = null,
+    ) {}
 }

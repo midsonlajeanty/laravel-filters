@@ -16,6 +16,18 @@ use Mds\LaravelFilters\Contracts\QueryOperator;
 
 abstract class QueryFilter
 {
+    /** @var array<class-string, \ReflectionClass<QueryFilter>> */
+    private static array $reflectionCache = [];
+
+    /**
+     * @return \ReflectionClass<static>
+     */
+    private function reflect(): \ReflectionClass
+    {
+        /** @var \ReflectionClass<static> */
+        return self::$reflectionCache[static::class] ??= new \ReflectionClass(static::class);
+    }
+
     /**
      * Apply the filters to the given query builder.
      *
@@ -29,7 +41,7 @@ abstract class QueryFilter
             fn ($value): bool => $value !== null
         );
 
-        $reflection = new \ReflectionClass($this);
+        $reflection = $this->reflect();
 
         foreach ($properties as $name => $value) {
             $methodName = 'filter'.ucfirst((string) $name);
@@ -41,19 +53,31 @@ abstract class QueryFilter
             }
 
             $column = $name;
+            $operator = null;
+
             if ($reflection->hasProperty($name)) {
                 $propertyReflection = $reflection->getProperty($name);
 
-                if (count($propertyReflection->getAttributes(Sorts::class)) > 0) {
-                    $this->applySorts($query, $value);
+                $sortsAttributes = $propertyReflection->getAttributes(Sorts::class);
+                if (count($sortsAttributes) > 0) {
+                    $sortsInstance = $sortsAttributes[0]->newInstance();
+                    $this->applySorts($query, $value, $sortsInstance->allowed, $sortsInstance->default);
 
                     continue;
                 }
 
                 $mapToAttributes = $propertyReflection->getAttributes(MapTo::class);
                 if (count($mapToAttributes) > 0) {
-                    $column = $mapToAttributes[0]->newInstance()->column;
+                    $mapTo = $mapToAttributes[0]->newInstance();
+                    $column = $mapTo->column;
+                    $operator = $mapTo->operator;
                 }
+            }
+
+            if ($operator !== null) {
+                $this->applyMappedOperator($query, $column, $operator, $value);
+
+                continue;
             }
 
             if (is_array($value) && Arr::isAssoc($value)) {
@@ -79,20 +103,56 @@ abstract class QueryFilter
 
     /**
      * @param  Builder<Model>  $query
+     * @param  array<int, string>  $allowed
+     * @param  array<string, 'asc'|'desc'>  $default
      */
-    protected function applySorts(Builder $query, mixed $value): void
+    protected function applySorts(Builder $query, mixed $value, array $allowed = [], array $default = []): void
     {
         $sorts = is_array($value) ? $value : [$value];
 
-        foreach ($sorts as $sort) {
-            if (! is_string($sort) || $sort === '') {
-                continue;
+        $validSorts = array_filter(
+            $sorts,
+            fn ($s): bool => is_string($s) && $s !== ''
+        );
+
+        if ($validSorts === [] && $default !== []) {
+            foreach ($default as $col => $dir) {
+                if ($allowed !== [] && ! in_array($col, $allowed, true)) {
+                    continue;
+                }
+
+                $query->orderBy($col, $dir);
             }
 
+            return;
+        }
+
+        foreach ($validSorts as $sort) {
             $direction = str_starts_with($sort, '-') ? 'desc' : 'asc';
             $column = ltrim($sort, '-');
 
+            if ($allowed !== [] && ! in_array($column, $allowed, true)) {
+                continue;
+            }
+
             $query->orderBy($column, $direction);
+        }
+    }
+
+    /**
+     * Apply a single operator specified via #[MapTo] attribute.
+     *
+     * @param  Builder<Model>  $query
+     */
+    protected function applyMappedOperator(Builder $query, string $column, string $operator, mixed $value): void
+    {
+        /** @var array<string, class-string<QueryOperator>> $registeredOperators */
+        $registeredOperators = config('filters.operators', []);
+
+        if (isset($registeredOperators[$operator])) {
+            /** @var QueryOperator $operatorInstance */
+            $operatorInstance = app($registeredOperators[$operator]);
+            $operatorInstance->apply($query, $column, $value);
         }
     }
 
@@ -125,7 +185,7 @@ abstract class QueryFilter
     {
         /** @var array<string, mixed> $properties */
         $properties = get_object_vars($this);
-        $reflection = new \ReflectionClass($this);
+        $reflection = $this->reflect();
 
         foreach ($reflection->getProperties() as $property) {
             if (count($property->getAttributes(Hidden::class)) > 0) {

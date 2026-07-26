@@ -43,7 +43,7 @@ composer require midsonlajeanty/laravel-filters
 Optionally, publish the configuration to customize global delimiters, invalid value actions, casters, and operators:
 
 ```bash
-php artisan vendor:publish --tag="filters-config"
+php artisan vendor:publish --tag="laravel-filters-config"
 ```
 
 ## Usage
@@ -90,11 +90,14 @@ final class UserFilter extends QueryFilter
 
         #[MapTo('email', operator: 'contains')]
         public readonly ?string $search = null,
-        
-        #[MapTo('created_at', operator: '>=')]
+
+        #[MapTo('created_at', operator: 'gte')]
         public readonly ?Carbon $from_date = null,
 
-        #[Sorts(default: ['created_at' => 'desc'])]
+        #[Sorts(
+            allowed: ['created_at', 'name', 'email'],
+            default: ['created_at' => 'desc'],
+        )]
         public readonly array $sort = [],
     ) {}
 }
@@ -102,7 +105,7 @@ final class UserFilter extends QueryFilter
 
 ### Custom filtering methods
 
-If a property requires complex logic instead of a simple column mapping, define a method matching the property name. It receives the `Builder` and the casted value:
+If a property requires complex logic instead of a simple column mapping, define a method named `filter` + property name (PascalCase). It receives the `Builder` and the casted value:
 
 ```php
 final class ActiveFilter extends QueryFilter
@@ -111,7 +114,7 @@ final class ActiveFilter extends QueryFilter
         public readonly bool $active,
     ) {}
 
-    public function active($query, bool $value): void
+    public function filterActive($query, bool $value): void
     {
         $query->whereNotNull('activated_at');
     }
@@ -133,6 +136,148 @@ class UserController extends Controller
     }
 }
 ```
+
+## Advanced Features
+
+### Query Name Mapping
+
+Rename the expected query string parameter using `#[QueryName]`:
+
+```php
+use Mds\LaravelFilters\Attributes\QueryName;
+
+final class UserFilter extends QueryFilter
+{
+    public function __construct(
+        #[QueryName('q')]
+        public readonly ?string $search = null,
+    ) {}
+}
+```
+
+Now `?q=john` will populate the `$search` property.
+
+### Explicit Casters
+
+Force a specific caster for a property using `#[Cast]`:
+
+```php
+use Mds\LaravelFilters\Attributes\Cast;
+use App\Casters\MyCaster;
+
+final class UserFilter extends QueryFilter
+{
+    public function __construct(
+        #[Cast(MyCaster::class)]
+        public readonly ?string $status = null,
+    ) {}
+}
+```
+
+### Typed Arrays
+
+Cast each element of an array to a specific type using `#[ArrayOf]`:
+
+```php
+use Mds\LaravelFilters\Attributes\ArrayOf;
+
+final class UserFilter extends QueryFilter
+{
+    public function __construct(
+        #[ArrayOf('int')]
+        public readonly array $ids = [],
+    ) {}
+}
+```
+
+`?ids=1,2,3` will be casted to `[1, 2, 3]` (integers).
+
+### Custom Date Formats
+
+Specify a date format for Carbon casting using `#[DateFormat]`:
+
+```php
+use Carbon\Carbon;
+use Mds\LaravelFilters\Attributes\DateFormat;
+
+final class UserFilter extends QueryFilter
+{
+    public function __construct(
+        #[DateFormat('d/m/Y')]
+        public readonly ?Carbon $birth_date = null,
+    ) {}
+}
+```
+
+### Custom Delimiters
+
+Override the default array delimiter (`,`) on a per-property basis using `#[Delimiter]`:
+
+```php
+use Mds\LaravelFilters\Attributes\Delimiter;
+
+final class UserFilter extends QueryFilter
+{
+    public function __construct(
+        #[Delimiter('|')]
+        public readonly array $tags = [],
+    ) {}
+}
+```
+
+`?tags=php|laravel` → `['php', 'laravel']`.
+
+### Hidden Properties
+
+Exclude a property from the `toArray()` output using `#[Hidden]`:
+
+```php
+use Mds\LaravelFilters\Attributes\Hidden;
+
+final class UserFilter extends QueryFilter
+{
+    public function __construct(
+        #[Hidden]
+        public readonly ?string $internal = null,
+    ) {}
+}
+```
+
+### Associative Array Operators
+
+Pass an associative array as a query parameter to apply multiple operators on the same column:
+
+```
+?price[gte]=10&price[lte]=100
+```
+
+```php
+final class ProductFilter extends QueryFilter
+{
+    public function __construct(
+        public readonly array $price = [],
+    ) {}
+}
+```
+
+Available built-in operators: `eq`, `gt`, `gte`, `lt`, `lte`, `between`, `in`, `contains`, `starts`, `ends`.
+
+### Artisan Generators
+
+Generate custom operators and casters:
+
+```bash
+php artisan make:operator CustomOperator
+php artisan make:caster CustomCaster
+```
+
+### Configuration
+
+The `invalid_value_action` config key controls how the package behaves when a value cannot be casted:
+
+- `'throw'` (default): throws a `ValidationException` with field-level errors.
+- `'ignore'`: silently ignores the invalid parameter.
+- `'null'`: sets the value to `null`.
 
 ## Contributing
 

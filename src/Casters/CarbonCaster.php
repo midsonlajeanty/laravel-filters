@@ -28,7 +28,11 @@ final readonly class CarbonCaster implements QueryCaster
     public function cast(\ReflectionParameter|\ReflectionProperty $reflection, ReflectionNamedType $type, mixed $value, Request $request): mixed
     {
         if (empty($value)) {
-            return null;
+            if ($type->allowsNull()) {
+                return null;
+            }
+
+            throw CastException::invalidValue($type->getName(), $value);
         }
 
         $className = $type->getName();

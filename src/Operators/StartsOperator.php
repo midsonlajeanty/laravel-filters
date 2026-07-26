@@ -16,6 +16,7 @@ final readonly class StartsOperator implements QueryOperator
     public function apply(Builder $query, string $column, mixed $value): void
     {
         $valStr = is_scalar($value) || $value instanceof \Stringable ? (string) $value : '';
-        $query->where($column, 'LIKE', $valStr.'%');
+        $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $valStr);
+        $query->where($column, 'LIKE', $escaped.'%');
     }
 }

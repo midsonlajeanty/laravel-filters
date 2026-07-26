@@ -7,6 +7,7 @@ namespace Mds\LaravelFilters\Casters;
 use Illuminate\Http\Request;
 use Mds\LaravelFilters\Attributes\Delimiter;
 use Mds\LaravelFilters\Contracts\QueryCaster;
+use Mds\LaravelFilters\Exceptions\CastException;
 use ReflectionNamedType;
 
 final readonly class BuiltinCaster implements QueryCaster
@@ -40,8 +41,8 @@ final readonly class BuiltinCaster implements QueryCaster
         $valStr = is_scalar($value) || $value instanceof \Stringable ? (string) $value : '';
 
         return match ($type->getName()) {
-            'int' => is_numeric($value) ? (int) $value : 0,
-            'float' => is_numeric($value) ? (float) $value : 0.0,
+            'int' => is_numeric($value) ? (int) $value : throw CastException::invalidValue('int', $value),
+            'float' => is_numeric($value) ? (float) $value : throw CastException::invalidValue('float', $value),
             'bool' => filter_var($value, FILTER_VALIDATE_BOOLEAN),
             'string' => $valStr,
             'array' => is_array($value) ? $value : explode($delimiter, $valStr),

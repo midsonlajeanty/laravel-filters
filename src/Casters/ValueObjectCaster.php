@@ -38,11 +38,17 @@ final readonly class ValueObjectCaster implements QueryCaster
         $valStr = is_scalar($value) || $value instanceof \Stringable ? (string) $value : '';
 
         try {
+            if (method_exists($className, 'tryFrom')) {
+                $result = $className::tryFrom($value);
+
+                if ($result !== null) {
+                    return $result;
+                }
+
+                throw CastException::invalidValue($className, $value);
+            }
             if (method_exists($className, 'from')) {
                 return $className::from($value);
-            }
-            if (method_exists($className, 'tryFrom')) {
-                return $className::tryFrom($value);
             }
             if (method_exists($className, 'parse') && $valStr !== '') {
                 return $className::parse($valStr);

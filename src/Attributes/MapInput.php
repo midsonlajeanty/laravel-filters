@@ -6,6 +6,9 @@ namespace Mds\LaravelFilters\Attributes;
 
 use Attribute;
 
+/**
+ * @deprecated Use {@see QueryName} instead.
+ */
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_PARAMETER)]
 final readonly class MapInput
 {

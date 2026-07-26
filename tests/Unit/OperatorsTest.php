@@ -82,3 +82,42 @@ it('applies StartsOperator', function (): void {
     $operator->apply($this->query, 'name', 'john');
     expect($this->query->toSql())->toContain('LIKE ?');
 });
+
+it('escapes LIKE special characters in ContainsOperator', function (): void {
+    $operator = new ContainsOperator;
+    $operator->apply($this->query, 'name', '100%_discount');
+    $bindings = $this->query->getBindings();
+    expect($bindings[0])->toBe('%100\%\_discount%');
+});
+
+it('escapes LIKE special characters in StartsOperator', function (): void {
+    $operator = new StartsOperator;
+    $operator->apply($this->query, 'name', '%admin');
+    $bindings = $this->query->getBindings();
+    expect($bindings[0])->toBe('\%admin%');
+});
+
+it('escapes LIKE special characters in EndsOperator', function (): void {
+    $operator = new EndsOperator;
+    $operator->apply($this->query, 'name', 'test%');
+    $bindings = $this->query->getBindings();
+    expect($bindings[0])->toBe('%test\%');
+});
+
+it('BetweenOperator ignores invalid value counts', function (): void {
+    $operator = new BetweenOperator;
+
+    // Single value — should be ignored
+    $operator->apply($this->query, 'age', '10');
+    expect($this->query->toSql())->not->toContain('between');
+
+    // Three values — should be ignored
+    $query2 = DummyUserModel::query();
+    $operator->apply($query2, 'age', [1, 2, 3]);
+    expect($query2->toSql())->not->toContain('between');
+
+    // String with exactly 2 values — should work
+    $query3 = DummyUserModel::query();
+    $operator->apply($query3, 'age', '10,20');
+    expect($query3->toSql())->toContain('between ? and ?');
+});
