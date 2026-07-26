@@ -1,0 +1,19 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - src
+
+    level: max
+
+    phpVersion:
+        min: 80300
+        max: 80500
+
+    treatPhpDocTypesAsCertain: false
+
+    ignoreErrors:
+        -
+            message: '#Trait Mds\\LaravelFilters\\Traits\\Filterable is used zero times and is not analysed\.#'
+            path: src/Traits/Filterable.php

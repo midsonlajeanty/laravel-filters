@@ -1,0 +1,15 @@
+{
+    "preset": "laravel",
+    "exclude": [
+        "config"
+    ],
+    "notPath": [
+        "tests/TestCase.php",
+        "tests/Feature/HydrationTest.php",
+        "tests/Feature/QueryBuilderTest.php"
+    ],
+    "rules": {
+        "declare_strict_types": true,
+        "final_class": true
+    }
+}
