@@ -84,7 +84,7 @@ jobs:
           coverage: none
 
       - name: Pin Laravel ${{ matrix.laravel }}
-        run: composer require "laravel/framework:${{ matrix.laravel }}" --no-dev --no-interaction --no-update
+        run: composer require "laravel/framework:${{ matrix.laravel }}" --no-interaction --no-update
 
       - name: Install runtime dependencies only
         run: composer update --no-dev --prefer-dist --no-progress
