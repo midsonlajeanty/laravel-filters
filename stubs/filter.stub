@@ -1,0 +1,11 @@
+<?php
+
+namespace {{ namespace }};
+
+use Illuminate\Database\Eloquent\Builder;
+use Mds\LaravelFilters\QueryFilter;
+
+final class {{ class }} extends QueryFilter
+{
+    // public string $name;
+}

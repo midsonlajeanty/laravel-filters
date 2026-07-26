@@ -1,0 +1,17 @@
+<?php
+
+namespace {{ namespace }};
+
+use Illuminate\Database\Eloquent\Builder;
+use Mds\LaravelFilters\Contracts\QueryOperator;
+
+final readonly class {{ class }} implements QueryOperator
+{
+    /**
+     * @param Builder<\Illuminate\Database\Eloquent\Model> $query
+     */
+    public function apply(Builder $query, string $column, mixed $value): void
+    {
+        // $query->where($column, '=', $value);
+    }
+}

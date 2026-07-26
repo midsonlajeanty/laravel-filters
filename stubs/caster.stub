@@ -1,0 +1,22 @@
+<?php
+
+namespace {{ namespace }};
+
+use Illuminate\Http\Request;
+use Mds\LaravelFilters\Contracts\QueryCaster;
+use ReflectionNamedType;
+use ReflectionParameter;
+use ReflectionProperty;
+
+final readonly class {{ class }} implements QueryCaster
+{
+    public function supports(ReflectionNamedType $type): bool
+    {
+        return false;
+    }
+
+    public function cast(ReflectionParameter|ReflectionProperty $reflection, ReflectionNamedType $type, mixed $value, Request $request): mixed
+    {
+        return $value;
+    }
+}
