@@ -38,7 +38,7 @@ abstract class QueryFilter
     {
         $properties = array_filter(
             get_object_vars($this),
-            fn ($value): bool => $value !== null
+            fn (mixed $value): bool => $value !== null
         );
 
         $reflection = $this->reflect();
@@ -112,7 +112,7 @@ abstract class QueryFilter
 
         $validSorts = array_filter(
             $sorts,
-            fn ($s): bool => is_string($s) && $s !== ''
+            fn (mixed $s): bool => is_string($s) && $s !== ''
         );
 
         if ($validSorts === [] && $default !== []) {

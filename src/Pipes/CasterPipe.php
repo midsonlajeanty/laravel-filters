@@ -91,7 +91,7 @@ final readonly class CasterPipe implements Pipe
             };
 
             $castedArray = array_map(
-                fn ($item): mixed => $this->castSingle($reflection, $fakeItemType, $item, $context),
+                fn (mixed $item): mixed => $this->castSingle($reflection, $fakeItemType, $item, $context),
                 $value
             );
 
