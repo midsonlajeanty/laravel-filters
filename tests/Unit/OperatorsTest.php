@@ -107,16 +107,16 @@ it('escapes LIKE special characters in EndsOperator', function (): void {
 it('BetweenOperator ignores invalid value counts', function (): void {
     $operator = new BetweenOperator;
 
-    // Single value — should be ignored
+    // Single value - should be ignored
     $operator->apply($this->query, 'age', '10');
     expect($this->query->toSql())->not->toContain('between');
 
-    // Three values — should be ignored
+    // Three values - should be ignored
     $query2 = DummyUserModel::query();
     $operator->apply($query2, 'age', [1, 2, 3]);
     expect($query2->toSql())->not->toContain('between');
 
-    // String with exactly 2 values — should work
+    // String with exactly 2 values - should work
     $query3 = DummyUserModel::query();
     $operator->apply($query3, 'age', '10,20');
     expect($query3->toSql())->toContain('between ? and ?');
