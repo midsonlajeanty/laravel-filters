@@ -19,15 +19,15 @@
         "laravel/framework": "^11.0||^12.0||^13.0"
     },
     "require-dev": {
-        "larastan/larastan": "^2.9 || ^3.0",
-        "laravel/pint": "^1.15",
-        "mockery/mockery": "^1.6",
+        "larastan/larastan": "^3.12",
+        "laravel/pint": "^1.32",
+        "mockery/mockery": "^1.6.15",
         "orchestra/testbench": "^9.0 || ^10.0 || ^11.0",
-        "pestphp/pest": "^3.0",
-        "pestphp/pest-plugin-type-coverage": "^3.0",
-        "phpstan/phpstan": "^1.10 || ^2.0",
+        "pestphp/pest": "^3.0 || ^4.0 || ^5.0",
+        "pestphp/pest-plugin-type-coverage": "^3.0 || ^4.0 || ^5.0",
+        "phpstan/phpstan": "^2.2",
         "ramsey/uuid": "^4.9",
-        "rector/rector": "^2.5",
+        "rector/rector": "^2.6",
         "spatie/laravel-model-states": "*"
     },
     "autoload": {
